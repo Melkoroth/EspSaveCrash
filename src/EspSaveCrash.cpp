@@ -49,16 +49,16 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack
   // The buffer size is SAVE_CRASH_EEPROM_OFFSET + SAVE_CRASH_SPACE_SIZE
   EEPROM.begin(EspSaveCrash::_offset + EspSaveCrash::_size);
 
-  byte crashCounter = EEPROM.read(EspSaveCrash::_offset + SAVE_CRASH_COUNTER);
-  int16_t writeFrom;
-  if(crashCounter == 0)
-  {
-    writeFrom = SAVE_CRASH_DATA_SETS;
-  }
-  else
-  {
-    EEPROM.get(EspSaveCrash::_offset + SAVE_CRASH_WRITE_FROM, writeFrom);
-  }
+  // byte crashCounter = EEPROM.read(EspSaveCrash::_offset + SAVE_CRASH_COUNTER);
+  int16_t writeFrom = SAVE_CRASH_DATA_SETS;
+  // if(crashCounter == 0)
+  // {
+  //   writeFrom = SAVE_CRASH_DATA_SETS;
+  // }
+  // else
+  // {
+  //   EEPROM.get(EspSaveCrash::_offset + SAVE_CRASH_WRITE_FROM, writeFrom);
+  // }
 
   // is there free EEPROM space avialable to save data for this crash?
   if (writeFrom + SAVE_CRASH_STACK_TRACE > EspSaveCrash::_size)
@@ -66,8 +66,8 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack
     return;
   }
 
-  // increment crash counter and write it to EEPROM
-  EEPROM.write(EspSaveCrash::_offset + SAVE_CRASH_COUNTER, ++crashCounter);
+  // set counter to 1
+  EEPROM.write(EspSaveCrash::_offset + SAVE_CRASH_COUNTER, 1);
 
   // now address EEPROM contents including _offset
   writeFrom += EspSaveCrash::_offset;
@@ -152,13 +152,13 @@ void EspSaveCrash::print(Print& outputDev)
     return;
   }
 
-  outputDev.println("Crash information recovered from EEPROM");
+  //outputDev.println("Crash information recovered from EEPROM");
   int16_t readFrom = _offset + SAVE_CRASH_DATA_SETS;
-  for (byte k = 0; k < crashCounter; k++)
-  {
+  //for (byte k = 0; k < crashCounter; k++)
+  //{
     uint32_t crashTime;
     EEPROM.get(readFrom + SAVE_CRASH_CRASH_TIME, crashTime);
-    outputDev.printf("Crash # %d at %ld ms\n", k + 1, crashTime);
+    //outputDev.printf("Crash # %d at %ld ms\n", k + 1, crashTime);
 
     outputDev.printf("Restart reason: %d\n", EEPROM.read(readFrom + SAVE_CRASH_RESTART_REASON));
     outputDev.printf("Exception cause: %d\n", EEPROM.read(readFrom + SAVE_CRASH_EXCEPTION_CAUSE));
@@ -197,7 +197,7 @@ void EspSaveCrash::print(Print& outputDev)
     eepromSpaceEnd:
     outputDev.println("<<<stack<<<");
     readFrom = readFrom + SAVE_CRASH_STACK_TRACE + stackLength;
-  }
+  //}
   int16_t writeFrom;
   EEPROM.get(_offset + SAVE_CRASH_WRITE_FROM, writeFrom);
   EEPROM.end();
